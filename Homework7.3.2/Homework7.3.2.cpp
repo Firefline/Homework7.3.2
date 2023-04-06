@@ -25,7 +25,8 @@ void get_vector(std::vector<int>& vector_, int size_)
     }
 }
 
-void f_each(std::vector<int>::iterator &it_begin, std::vector<int>::iterator &it_end, void (&function)(int))
+template <typename T>
+T f_each(std::vector<int>::iterator &it_begin, std::vector<int>::iterator &it_end, void (&function)(int))
 {
     std::vector<int> vec_test(it_begin, it_end);
     std::vector<int>::iterator it = vec_test.begin();
@@ -41,11 +42,19 @@ template<typename It, typename T>
 T each(It begin, It end, T init)
 {
     const int length = distance(begin, end);
-    It middle = begin;
-    std::for_each(middle, length / 2, init);
-    std::future<T> res_first_half = std::async(each<It, T>, begin, middle, init);
-    T res_second_half = each(middle, end, T());
-    return res_first_half.get() + res_second_half;
+    const int max = 20;
+    if (length < max)
+    {
+        return std::for_each(begin, end, init);
+    }
+    else
+    {
+        It middle = begin;
+        std::for_each(middle, length / 2, init);
+        std::future<T> res_first_half = std::async(each<It, T>, begin, middle, init);
+        T res_second_half = each(middle, end, T());
+        return 0;
+    }
 }
 
 int main(int argc, char** argv)
@@ -54,7 +63,7 @@ int main(int argc, char** argv)
 
     std::vector<int> vec;
 
-    get_vector(vec, 10);
+    get_vector(vec, 100);
 
     int result = each(vec.begin(), vec.end(), 0);
 }
